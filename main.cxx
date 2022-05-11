@@ -74,8 +74,11 @@ int main(int argc, char **argv)
   using SpatialObjectToImageFilterType = itk::SpatialObjectToImageFilter<EllipseType, ImageType>;
   using ImageWriterType = itk::ImageFileWriter<ImageType>;
 
-  ImageType::SizeType imageSize({size,size,size});
-  ImageType::SpacingType imageSpacing({spacing,spacing,spacing});
+  ImageType::SizeType imageSize({size, size, size});
+  ImageType::SpacingType imageSpacing;
+  imageSpacing[0] = spacing; imageSpacing[1] = spacing; imageSpacing[2] = spacing;
+  ImageType::PointType imageOrigin({0.0f, 0.0f, 0.0f});
+  ImageType::PointType imageCenter({size/2.0f, size/2.0f, size/2.0f});
 
   // =========================================================================
   // Ellipse generation
@@ -83,6 +86,7 @@ int main(int argc, char **argv)
   auto ellipse = EllipseType::New();
   ellipse->SetRadiusInObjectSpace(radius);
   ellipse->SetDefaultInsideValue(1);
+  ellipse->SetCenterInObjectSpace(imageCenter);
   ellipse->Update();
 
   // =========================================================================
@@ -91,6 +95,7 @@ int main(int argc, char **argv)
   auto imageFilter = SpatialObjectToImageFilterType::New();
   imageFilter->SetSize(imageSize);
   imageFilter->SetSpacing(imageSpacing);
+  imageFilter->SetOrigin(imageOrigin);
   imageFilter->SetInput(ellipse);
   imageFilter->SetUseObjectValue(true);
   imageFilter->SetOutsideValue(0);
